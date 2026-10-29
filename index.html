@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ADUNICH — One link in. Everything out.</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧿</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #120F26;
+    --surface: #1C1838;
+    --surface-raised: #241F47;
+    --hairline: #332C5C;
+    --text: #F3F1FA;
+    --text-muted: #A79FC4;
+    --pink: #FF5C7F;
+    --pink-dim: #4A2338;
+    --cyan: #4FE3CE;
+    --cyan-dim: #1C3D3C;
+    --radius-panel: 8px;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --ink: #120F26; --surface: #1C1838; --surface-raised: #241F47;
+      --hairline: #332C5C; --text: #F3F1FA; --text-muted: #A79FC4;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; background: var(--ink); color: var(--text);
+    font-family: 'Work Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body::before {
+    content: ""; position: fixed; inset: 0 0 auto; z-index: 10;
+    height: calc(env(safe-area-inset-top, 0px) + 64px);
+    background: var(--ink);
+  }
+
+  a { color: inherit; }
+
+  .topbar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px; background: rgba(18,15,38,0.85);
+    backdrop-filter: blur(10px); border-bottom: 1px solid var(--hairline);
+  }
+  .wordmark { font-family: 'Fraunces', serif; font-weight: 600; font-size: 20px; letter-spacing: 0.01em; }
+  .wordmark span { color: var(--pink); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
+
+  .hero { padding: 56px 0 40px; }
+  .hero h1 {
+    font-family: 'Fraunces', serif; font-weight: 500; font-style: italic;
+    font-size: clamp(34px, 7vw, 54px); line-height: 1.08; margin: 0 0 18px;
+    max-width: 14ch;
+  }
+  .hero p { color: var(--text-muted); font-size: 17px; max-width: 46ch; line-height: 1.55; margin: 0 0 28px; }
+
+  .fetch-row {
+    display: flex; gap: 10px; background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: var(--radius-panel); padding: 6px;
+  }
+  .fetch-row input {
+    flex: 1; background: transparent; border: none; color: var(--text);
+    font-size: 15px; padding: 12px 14px; outline: none; font-family: inherit;
+  }
+  .fetch-row input::placeholder { color: var(--text-muted); }
+  .btn {
+    border: none; border-radius: calc(var(--radius-panel) - 2px); padding: 12px 20px;
+    font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-pink { background: var(--pink); color: #1A0A12; }
+  .btn-cyan { background: var(--cyan); color: #06201C; }
+  .btn:disabled { opacity: 0.5; cursor: progress; }
+
+  .rail-section { margin-top: 48px; }
+  .rail-head {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px;
+  }
+  .rail-head h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.14em; margin: 0; color: var(--text); }
+  .rail-head .count { font-size: 12px; color: var(--text-muted); }
+
+  .rail {
+    display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px;
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+
+  .chip {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: 999px; padding: 10px 18px; font-size: 14px; font-weight: 500;
+    cursor: pointer; white-space: nowrap; color: var(--text);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .chip:hover { border-color: var(--chip-accent, var(--pink)); }
+  .chip.active { background: var(--surface-raised); border-color: var(--chip-accent, var(--pink)); }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--chip-accent, var(--pink)); }
+
+  .rail-section[data-group="ai"] .chip { --chip-accent: var(--cyan); }
+
+  .panel {
+    display: none; margin-top: 14px; background: var(--surface);
+    border: 1px solid var(--hairline); border-radius: var(--radius-panel);
+    padding: 18px;
+  }
+  .panel.open { display: block; }
+  .panel p.hint { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; line-height: 1.5; }
+  .panel-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .panel-row input, .panel-row textarea {
+    flex: 1; min-width: 180px; background: var(--ink); border: 1px solid var(--hairline);
+    border-radius: 6px; color: var(--text); padding: 10px 12px; font-family: inherit;
+    font-size: 14px; outline: none; resize: vertical;
+  }
+  .panel-row input:focus, .panel-row textarea:focus { border-color: var(--pink); }
+  .rail-section[data-group="ai"] .panel-row input:focus,
+  .rail-section[data-group="ai"] .panel-row textarea:focus { border-color: var(--cyan); }
+
+  .panel-opts { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .panel-opts input { max-width: 140px; font-size: 13px; }
+
+  .result { margin-top: 16px; font-size: 14px; line-height: 1.6; }
+  .result.loading { color: var(--text-muted); }
+  .result.error { color: var(--pink); }
+  .result img, .result video { max-width: 100%; border-radius: 6px; display: block; margin-top: 10px; }
+  .result audio { width: 100%; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin-top: 6px; }
+  .kv dt { color: var(--text-muted); font-weight: 500; }
+  .kv dd { margin: 0; }
+  .media-links { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .media-links a {
+    display: block; background: var(--surface-raised); border-radius: 6px;
+    padding: 10px 12px; font-size: 13px; text-decoration: none; border: 1px solid var(--hairline);
+  }
+
+  .voice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin-top: 10px; }
+  .voice-btn {
+    background: var(--ink); border: 1px solid var(--hairline); color: var(--text);
+    border-radius: 6px; padding: 8px 10px; font-size: 12px; cursor: pointer; text-align: left;
+    font-family: inherit;
+  }
+  .voice-btn:hover { border-color: var(--cyan); }
+  .voice-btn.active { border-color: var(--cyan); background: var(--cyan-dim); }
+
+  footer {
+    text-align: center; padding: 40px 24px 60px; color: var(--text-muted); font-size: 13px;
+  }
+  footer .credit { color: var(--pink); font-family: 'Fraunces', serif; font-style: italic; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .chip { transition: none; }
+  }
+
+  :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark">ADUNICH<span>·</span>toolkit</div>
+</div>
+
+<main>
+  <section class="hero">
+    <h1>One link in.<br>Everything out.</h1>
+    <p>Paste a TikTok, Instagram, Twitter/X, Facebook or Pinterest link and get every quality, instantly. Or pick a tool below.</p>
+    <div class="fetch-row">
+      <input id="dl-input" type="url" placeholder="Paste a link…" />
+      <button class="btn btn-pink" id="dl-btn" onclick="fetchDownload()">Fetch</button>
+    </div>
+    <div id="dl-result" class="result"></div>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section class="rail-section" data-group="media">
+    <div class="rail-head"><h2>Downloads</h2></div>
+    <div class="rail">
+      <div class="chip" data-tool="sounddl" onclick="openPanel('sounddl', this)"><span class="dot"></span>Sound Download</div>
+    </div>
+    <div class="panel" data-panel="sounddl">
+      <p class="hint">Pull the audio track out of any supported link.</p>
+      <div class="panel-row">
+        <input type="url" placeholder="Paste a link…" data-field="url" />
+        <button class="btn btn-pink" onclick="runTool('sounddl', this)">Get Sound</button>
+      </div>
+      <div class="result" data-result="sounddl"></div>
+    </div>
+  </section>
+
+  <!-- LOOKUPS -->
+  <section class="rail-section" data-group="media">
+    <div class="rail-head"><h2>Lookups</h2></div>
+    <div class="rail">
+      <div class="chip" data-tool="ffstalk" onclick="openPanel('ffstalk', this)"><span class="dot"></span>Free Fire</div>
+      <div class="chip" data-tool="ytstalk" onclick="openPanel('ytstalk', this)"><span class="dot"></span>YouTube</div>
+      <div class="chip" data-tool="igstalk" onclick="openPanel('igstalk', this)"><span class="dot"></span>Instagram</div>
+    </div>
+    <div class="panel" data-panel="ffstalk">
+      <p class="hint">Look up a Free Fire account by player ID.</p>
+      <div class="panel-row">
+        <input type="text" placeholder="Player ID…" data-field="id" />
+        <button class="btn btn-pink" onclick="runTool('ffstalk', this)">Look Up</button>
+      </div>
+      <div class="result" data-result="ffstalk"></div>
+    </div>
+    <div class="panel" data-panel="ytstalk">
+      <p class="hint">Look up a YouTube channel by username.</p>
+      <div class="panel-row">
+        <input type="text" placeholder="Channel username…" data-field="user" />
+        <button class="btn btn-pink" onclick="runTool('ytstalk', this)">Look Up</button>
+      </div>
+      <div class="result" data-result="ytstalk"></div>
+    </div>
+    <div class="panel" data-panel="igstalk">
+      <p class="hint">Look up an Instagram account by username.</p>
+      <div class="panel-row">
+        <input type="text" placeholder="Instagram username…" data-field="user" />
+        <button class="btn btn-pink" onclick="runTool('igstalk', this)">Look Up</button>
+      </div>
+      <div class="result" data-result="igstalk"></div>
+    </div>
+  </section>
+
+  <!-- CREATIVE -->
+  <section class="rail-section" data-group="media">
+    <div class="rail-head"><h2>Creative</h2></div>
+    <div class="rail">
+      <div class="chip" data-tool="mkimage" onclick="openPanel('mkimage', this)"><span class="dot"></span>Text Image</div>
+      <div class="chip" data-tool="genimage" onclick="openPanel('genimage', this)"><span class="dot"></span>AI Image</div>
+      <div class="chip" data-tool="tts" onclick="openPanel('tts', this)"><span class="dot"></span>Text to Speech</div>
+    </div>
+    <div class="panel" data-panel="mkimage">
+      <p class="hint">Stylized text-on-image generator. Background, color and emoji style are optional.</p>
+      <div class="panel-row">
+        <input type="text" placeholder="Text…" data-field="text" />
+        <button class="btn btn-pink" onclick="runTool('mkimage', this)">Create</button>
+      </div>
+      <div class="panel-opts">
+        <input type="text" placeholder="background" data-field="background" />
+        <input type="text" placeholder="color" data-field="color" />
+        <input type="text" placeholder="emojiStyle" data-field="emojiStyle" />
+      </div>
+      <div class="result" data-result="mkimage"></div>
+    </div>
+    <div class="panel" data-panel="genimage">
+      <p class="hint">Generate an image from a text prompt using AI.</p>
+      <div class="panel-row">
+        <input type="text" placeholder="Describe an image…" data-field="prompt" />
+        <button class="btn btn-pink" onclick="runTool('genimage', this)">Generate</button>
+      </div>
+      <div class="result" data-result="genimage"></div>
+    </div>
+    <div class="panel" data-panel="tts">
+      <p class="hint">Type your text, then pick a voice below.</p>
+      <div class="panel-row">
+        <input type="text" placeholder="Text to speak…" data-field="text" />
+      </div>
+      <div class="panel-opts">
+        <input type="text" placeholder="pitch (optional)" data-field="pitch" />
+        <input type="text" placeholder="speed (optional)" data-field="speed" />
+      </div>
+      <div class="voice-grid" id="voice-grid"></div>
+      <div class="result" data-result="tts"></div>
+    </div>
+  </section>
+
+  <!-- AI -->
+  <section class="rail-section" data-group="ai">
+    <div class="rail-head"><h2>AI</h2></div>
+    <div class="rail">
+      <div class="chip" data-tool="chat" onclick="openPanel('chat', this)"><span class="dot"></span>Chat</div>
+      <div class="chip" data-tool="detectlang" onclick="openPanel('detectlang', this)"><span class="dot"></span>Detect Language</div>
+    </div>
+    <div class="panel" data-panel="chat">
+      <p class="hint">Ask the AI anything.</p>
+      <div class="panel-row">
+        <textarea rows="2" placeholder="Your message…" data-field="text"></textarea>
+        <button class="btn btn-cyan" onclick="runTool('chat', this)">Send</button>
+      </div>
+      <div class="result" data-result="chat"></div>
+    </div>
+    <div class="panel" data-panel="detectlang">
+      <p class="hint">Find out what language a piece of text is written in.</p>
+      <div class="panel-row">
+        <input type="text" placeholder="Text to analyze…" data-field="text" />
+        <button class="btn btn-cyan" onclick="runTool('detectlang', this)">Detect</button>
+      </div>
+      <div class="result" data-result="detectlang"></div>
+    </div>
+  </section>
+
+  <!-- FUN -->
+  <section class="rail-section" data-group="media">
+    <div class="rail-head"><h2>Fun</h2></div>
+    <div class="rail">
+      <div class="chip" data-tool="tiktokgirl" onclick="openPanel('tiktokgirl', this)"><span class="dot"></span>Random TikTok</div>
+      <div class="chip" data-tool="randomcar" onclick="openPanel('randomcar', this)"><span class="dot"></span>Random Car</div>
+    </div>
+    <div class="panel" data-panel="tiktokgirl">
+      <p class="hint">Fetch a random video.</p>
+      <div class="panel-row"><button class="btn btn-pink" onclick="runTool('tiktokgirl', this)">Get Video</button></div>
+      <div class="result" data-result="tiktokgirl"></div>
+    </div>
+    <div class="panel" data-panel="randomcar">
+      <p class="hint">Fetch a random car image.</p>
+      <div class="panel-row"><button class="btn btn-pink" onclick="runTool('randomcar', this)">Get Image</button></div>
+      <div class="result" data-result="randomcar"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Built for sharing, not scraping. Be kind to the people behind every link.<br>
+  <span class="credit">Powered by ADUNICH</span>
+</footer>
+
+<script>
+  // Global functions wired directly via onclick="" attributes in the HTML
+  // above (rather than addEventListener added after the fact) so there is
+  // no separate "did my script find the right elements" step that can
+  // silently fail.
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function setResult(el, html, cls) {
+    el.className = "result" + (cls ? " " + cls : "");
+    el.innerHTML = html;
+  }
+
+  function fieldsFor(panel) {
+    var out = {};
+    $$("[data-field]", panel).forEach(function (el) {
+      if (el.value.trim()) out[el.dataset.field] = el.value.trim();
+    });
+    return out;
+  }
+
+  function renderKv(obj) {
+    var entries = Object.entries(obj || {}).filter(function (e) {
+      return e[1] !== null && e[1] !== undefined && e[1] !== "";
+    });
+    if (!entries.length) return "<p>No details returned.</p>";
+    var rows = entries.map(function (e) {
+      var label = e[0].replace(/_/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+      var val = typeof e[1] === "object" ? JSON.stringify(e[1]) : String(e[1]);
+      return "<dt>" + escapeHtml(label) + "</dt><dd>" + escapeHtml(val) + "</dd>";
+    });
+    return '<dl class="kv">' + rows.join("") + "</dl>";
+  }
+
+  async function callApi(path, params) {
+    var qs = new URLSearchParams(params || {}).toString();
+    var r = await fetch("/api/" + path + "?" + qs);
+    var data = await r.json();
+    if (!r.ok || data.ok === false) throw new Error(data.error || "Request failed");
+    return data;
+  }
+
+  // --- chip -> panel toggle (single panel open at a time) ---
+  function openPanel(tool, chipEl) {
+    var panel = document.querySelector('.panel[data-panel="' + tool + '"]');
+    if (!panel) return;
+    var alreadyOpen = panel.classList.contains("open");
+    $$(".panel.open").forEach(function (p) { p.classList.remove("open"); });
+    $$(".chip.active").forEach(function (c) { c.classList.remove("active"); });
+    if (!alreadyOpen) {
+      panel.classList.add("open");
+      if (chipEl) chipEl.classList.add("active");
+      panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+
+  // --- universal link downloader (hero) ---
+  async function fetchDownload() {
+    var input = $("#dl-input");
+    var out = $("#dl-result");
+    var link = input.value.trim();
+    if (!link) return;
+    setResult(out, "⏳ Fetching…", "loading");
+    try {
+      var data = await callApi("download", { url: link });
+      var html = "";
+      if (data.title) html += "<p><strong>" + escapeHtml(data.title) + "</strong></p>";
+      if (data.author) html += "<p>" + escapeHtml(data.author) + "</p>";
+      html += '<div class="media-links">';
+      data.items.forEach(function (item) {
+        html += '<a href="' + item.url + '" target="_blank" rel="noopener">' + escapeHtml(item.label) + " ↗</a>";
+      });
+      html += "</div>";
+      setResult(out, html || "No media found.", data.items.length ? "" : "error");
+    } catch (e) {
+      setResult(out, escapeHtml(e.message), "error");
+    }
+  }
+
+  // --- generic per-tool run buttons ---
+  async function runTool(tool, btn) {
+    var panel = btn.closest(".panel");
+    var out = $('[data-result="' + tool + '"]');
+    var fields = fieldsFor(panel);
+    btn.disabled = true;
+    setResult(out, "⏳ Working…", "loading");
+    try {
+      var data, html;
+      if (tool === "sounddl") {
+        data = await callApi("sounddl", fields);
+        html = (data.title ? "<p><strong>" + escapeHtml(data.title) + "</strong></p>" : "") +
+          '<audio controls src="' + data.audioUrl + '"></audio>';
+      } else if (tool === "ffstalk") {
+        data = await callApi("ffstalk", fields);
+        html = renderKv(data.result);
+      } else if (tool === "ytstalk") {
+        data = await callApi("ytstalk", fields);
+        html = (data.avatar ? '<img src="' + data.avatar + '" alt="" style="max-width:120px;border-radius:50%">' : "") + renderKv(data.result);
+      } else if (tool === "igstalk") {
+        data = await callApi("igstalk", fields);
+        html = (data.avatar ? '<img src="' + data.avatar + '" alt="" style="max-width:120px;border-radius:50%">' : "") + renderKv(data.result);
+      } else if (tool === "mkimage") {
+        data = await callApi("mkimage", fields);
+        html = '<img src="' + data.imageUrl + '" alt="">';
+      } else if (tool === "genimage") {
+        data = await callApi("genimage", fields);
+        html = '<img src="' + data.imageUrl + '" alt="">';
+      } else if (tool === "chat") {
+        data = await callApi("chat", fields);
+        html = "<p>" + escapeHtml(data.reply) + "</p>";
+      } else if (tool === "detectlang") {
+        data = await callApi("detectlang", fields);
+        html = renderKv(data.result);
+      } else if (tool === "tiktokgirl") {
+        data = await callApi("tiktokgirl", {});
+        html = '<video controls src="' + data.videoUrl + '"></video>';
+      } else if (tool === "randomcar") {
+        data = await callApi("randomcar", {});
+        html = '<img src="' + data.imageUrl + '" alt="">';
+      }
+      setResult(out, html, "");
+    } catch (e) {
+      setResult(out, escapeHtml(e.message), "error");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // --- TTS voice picker ---
+  function selectVoice(voice, btnEl) {
+    $$(".voice-btn", $("#voice-grid")).forEach(function (v) { v.classList.remove("active"); });
+    btnEl.classList.add("active");
+    runTtsVoice(voice);
+  }
+
+  async function runTtsVoice(voice) {
+    var panel = document.querySelector('.panel[data-panel="tts"]');
+    var out = $('[data-result="tts"]');
+    var fields = fieldsFor(panel);
+    if (!fields.text) {
+      setResult(out, "Type some text first.", "error");
+      return;
+    }
+    setResult(out, "⏳ Generating speech…", "loading");
+    try {
+      var result = await callApi("tts", Object.assign({}, fields, { voice: voice }));
+      setResult(out, '<audio controls autoplay src="' + result.audioUrl + '"></audio>', "");
+    } catch (e) {
+      setResult(out, escapeHtml(e.message), "error");
+    }
+  }
+
+  async function loadVoices() {
+    var grid = $("#voice-grid");
+    if (!grid) return;
+    try {
+      var data = await callApi("tts", {});
+      grid.innerHTML = "";
+      data.voices.forEach(function (voice) {
+        var b = document.createElement("button");
+        b.className = "voice-btn";
+        b.type = "button";
+        b.textContent = voice;
+        b.onclick = function () { selectVoice(voice, b); };
+        grid.appendChild(b);
+      });
+    } catch (e) {
+      grid.innerHTML = '<p style="color:var(--pink)">' + escapeHtml(e.message) + "</p>";
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", loadVoices);
+</script>
+</body>
+</html>
