@@ -46,6 +46,15 @@ function guessVoiceUrl(voiceName) {
 module.exports = withHandler(async (req, res) => {
   const text = (req.query.text || "").toString().trim();
   const voice = (req.query.voice || "").toString();
+
+  // No text/voice given — list mode (merged in from the old separate
+  // tts-voices endpoint, to stay under Vercel Hobby's 12-function cap).
+  if (!text && !voice) {
+    const r = await fetch("https://prexzyapis.com/tts/tts-voices");
+    const data = await r.json();
+    return res.status(200).json({ ok: true, voices: data.voices || [] });
+  }
+
   if (!text) return res.status(400).json({ ok: false, error: "Missing 'text' parameter" });
   if (!voice) return res.status(400).json({ ok: false, error: "Missing 'voice' parameter" });
 
